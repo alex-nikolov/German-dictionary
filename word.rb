@@ -1,12 +1,20 @@
 module German
   class Word
-    attr_accessor :entry, :meaning_groups
+    attr_accessor :entry, :meaning
 
-    def initialize(entry, meaning_groups = nil)
-      @entry = entry
-      @meaning_groups = Array.new
+    def initialize(description)
+      @entry = extract_entry(description)
+      @meaning = extract_meaning(description)
+    end
 
-      @meaning_groups = meaning_groups if meaning_groups
+    private
+
+    def extract_entry(description)
+      @entry = description.partition('*').first[1..-1]
+    end
+
+    def extract_meaning(description)
+      @meaning = description.partition('*')[1..2].join
     end
   end
 end

@@ -1,7 +1,7 @@
 require_relative 'word'
 
 module German
-  class Noun < Word
+  class Verb < Word
 
     #def initialize(description)
     #  @description = description

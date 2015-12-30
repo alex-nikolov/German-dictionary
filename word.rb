@@ -1,10 +1,11 @@
 module German
   class Word
-    attr_accessor :entry, :meaning
+    attr_accessor :entry, :meaning, :type
 
     def initialize(description)
       @entry = extract_entry(description)
       @meaning = extract_meaning(description)
+      @type = extract_type(description)
     end
 
     private
@@ -15,6 +16,11 @@ module German
 
     def extract_meaning(description)
       @meaning = description.partition('*')[1..2].join
+    end
+
+    def extract_type(description)
+      word_match = /.+\*(verb|noun|adj)\*.+/.match description
+      @type = word_match[1]
     end
   end
 end

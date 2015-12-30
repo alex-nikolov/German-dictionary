@@ -1,4 +1,4 @@
-@Hund*noun*gender:der*plural:-e*gen:-es*
+@Hund*noun*gender:der*plural:Hunde*gen:-es*
 #куче
 #ein scharfer ~ - (umg) строг началник
 @leisten*verb*forms:leistet, geleistet*aux:haben*trans:true*case:akk*

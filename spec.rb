@@ -2,7 +2,9 @@ describe 'Dictionary' do
   it 'loads entries from file' do
     dictionary = German::Dictionary.new('example.txt')
     expect(dictionary.entries.size).to eq 3
-    expect(dictionary.entries).to include 'Hund'
+    expect(dictionary.entries.has_key? 'Hund').to be true
+    expect(dictionary.entries.has_key? 'leisten').to be true
+    expect(dictionary.entries.has_key? 'folgen').to be true
   end
 end
 

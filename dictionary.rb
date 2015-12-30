@@ -9,11 +9,31 @@ module German
     attr_reader :entries, :verbs
 
     def initialize(file_name)
-      lines_read = IO.readlines(file_name)
+      lines_read = IO.readlines(file_name, 'r:iso-8859-1')
       @entries = AVLTree.new
       @verbs = AVLTree.new
 
       parse_lines_to_entries(lines_read)
+    end
+
+    def view_word(word)
+      @entries[word]
+    end
+
+    def add_word(word)
+      
+    end
+
+    private
+
+    def parse_word_type(line)
+      if line.include? '*noun*'
+        'noun'
+      elsif line.include? '*verb*'
+        'verb'
+      elsif line.include? '*adj*'
+        'adj'
+      end
     end
 
     def add_noun(noun)
@@ -27,18 +47,6 @@ module German
 
     def add_adj(adj)
       @entries[adj.entry] = adj.meaning
-    end
-
-    private
-
-    def parse_word_type(line)
-      if line.include? '*noun*'
-        'noun'
-      elsif line.include? '*verb*'
-        'verb'
-      elsif line.include? '*adj*'
-        'adj'
-      end
     end
 
     def parse_lines_to_entries(lines)

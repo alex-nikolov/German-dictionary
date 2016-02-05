@@ -1,82 +1,60 @@
 require 'io/console'
-require 'avl_tree'
+require 'sqlite3'
 
 require_relative 'noun'
 require_relative 'verb'
+require_relative 'adjective'
 
 module German
   class Dictionary
-    attr_reader :entries, :verbs
+    def extract_entry(word)
+      words = SQLite3::Database.open 'words.db'
+      words.results_as_hash = true
 
-    def initialize(file_name)
-      lines_read = IO.readlines(file_name, 'r:iso-8859-1')
-      @entries = AVLTree.new
-      @verbs = AVLTree.new
+      databases_found = locate_database_for_entry(words, word)
 
-      parse_lines_to_entries(lines_read)
+      handle_database_cases(words, word, databases_found)
     end
 
-    def view_word(word)
-      @entries[word]
-    end
-
-    def add_word(word)
-      
+    def add_entry(word)
+      word.add_entry
     end
 
     private
 
-    def parse_word_type(line)
-      if line.include? '*noun*'
-        'noun'
-      elsif line.include? '*verb*'
-        'verb'
-      elsif line.include? '*adj*'
-        'adj'
+    def handle_database_cases(words, word, databases_found)
+      raise 'Entry not found' if databases_found.length == 0
+      raise 'Multiple entries found' if databases_found.length > 1
+
+      extract_entry_from_concrete_database(words, word, databases_found)
+    end
+
+    def locate_database_for_entry(words, word)
+      ['Nouns', 'Verbs', 'Adjectives'].keep_if do |database|
+        words.execute("SELECT 1 FROM #{database}
+                       WHERE Entry = '#{word}'").length > 0
       end
     end
 
-    def add_noun(noun)
-      @entries[noun.entry] = noun.meaning
-    end
+    def extract_entry_from_concrete_database(words, word, databases_found)
+      statement = words.prepare "SELECT * FROM #{databases_found[0]}
+                                 WHERE Entry = '#{word}'"
+      run_statement = statement.execute.next
 
-    def add_verb(verb)
-      @entries[verb.entry] = verb.meaning
-      @verbs[verb.entry] = verb.meaning
-    end
+      close_database(words, statement)
 
-    def add_adj(adj)
-      @entries[adj.entry] = adj.meaning
-    end
-
-    def parse_lines_to_entries(lines)
-      new_entries_indexes = lines_with_new_entries(lines)
-      puts new_entries_indexes.to_s
-      new_entries_indexes.each do |word_first_line, word_last_line|
-        word_lines = lines[word_first_line..word_last_line].join
-        case parse_word_type(lines[word_first_line])
-          when 'noun'
-            add_noun(Noun.new(word_lines))
-          when 'verb'
-            add_verb(Verb.new(word_lines))
-          when 'adj'
-            add_adj(Adj.new(word_lines))
-        end
+      case databases_found[0]
+        when 'Nouns' then Noun.new(run_statement)
+        when 'Verbs' then Verb.new(run_statement)
+        when 'Adjectives' then Adjective.new(run_statement)
       end
     end
 
-    def lines_with_new_entries(lines)
-      new_entries_start_indexes = Array.new
-      lines.each_with_index do |line, index|
-        if line[0] == '@'
-          new_entries_start_indexes << index
-        end
-      end
-
-      new_entries_end_indexes = new_entries_start_indexes.map { |index| index - 1 }
-      new_entries_end_indexes.shift
-      new_entries_end_indexes << lines.length - 1
-      Hash[new_entries_start_indexes.zip new_entries_end_indexes]
+    def close_database(database, statement)
+      statement.close if statement
+      database.close if database
     end
   end
 end
+
+# rspec spec.rb --require ./dictionary.rb --colour --format documentation

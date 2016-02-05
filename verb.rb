@@ -2,22 +2,16 @@ require_relative 'word'
 
 module German
   class Verb < Word
-    attr_reader :forms, :auxiliary, :trans, :case
+    attr_reader :forms, :transitive, :case, :preposition
 
-    def initialize(description)
+    def initialize(database_hash)
       super
 
-      @forms = extract('forms', description)
-      @auxiliary = extract('aux', 'haben|sein', description)
-      @transitive = extract('trans', 'true|false', description)
-      @case = extract('case', 'akk|dat', description)
-    end
-
-    private
-
-    def extract(item, possible_values = '.+', description)
-      matched_data = /.+\*#{item}:(#{possible_values})\*.+/.match description
-      matched_data[1]
+      @forms = database_hash['Forms']
+      @transitive = database_hash['Transitive']
+      @case = database_hash['Case']
+      @preposition = database_hash['Preposition']
+      @separable = database_hash['Separable']
     end
   end
 end

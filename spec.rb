@@ -83,6 +83,33 @@ describe 'Dictionary' do
       expect(dictionary.exists_entry? 'example adjective').to be false
     end
   end
+
+  describe '#extract_entries_with_meaning' do
+    it 'extracts entry containing a unique meaning' do
+      matching_entries = dictionary.extract_entries_with_meaning('dog')
+      expect(matching_entries.size).to eq 1
+      expect(matching_entries[0].entry).to eq 'Hund'
+    end
+
+    it 'extracts entries containing a non-unique meaning' do
+      matching_entries = dictionary.extract_entries_with_meaning('lovely')
+      expect(matching_entries.size).to eq 2
+      found_entries = matching_entries.map { |word| word.entry }
+      expect(found_entries).to include 'schön'
+      expect(found_entries).to include 'hübsch'
+    end
+
+    it 'returns empty array when no entry matches meaning' do
+      matching_entries = dictionary.extract_entries_with_meaning('example')
+      expect(matching_entries.size).to eq 0
+    end
+
+    it 'only returns entries with matching whole words in meaning' do
+      matching_entries = dictionary.extract_entries_with_meaning('hand')
+      expect(matching_entries.size).to eq 1
+      expect(matching_entries[0].entry).to eq 'Hand'
+    end
+  end
 end
 
 describe 'Hash test' do

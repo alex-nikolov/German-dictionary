@@ -44,6 +44,30 @@ module German
       words.execute "DELETE FROM #{databases_found[0]} WHERE Entry = '#{word}'"
     end
 
+    def extract_entries_with_meaning(meaning)
+      words = SQLite3::Database.open @database
+      words.results_as_hash = true
+      statements = statements_for_each_database(words, meaning)
+
+      similar_meaning_words = extract_words_with_similar_meaning(statements)
+      #statements[0].each do |run_statement|
+      #  words_containing_meaning << Noun.new(run_statement)
+      #end
+
+      #statements[1].each do |run_statement|
+      #  words_containing_meaning << Verb.new(run_statement)
+      #end
+
+      #statements[2].each do |run_statement|
+      #  words_containing_meaning << Adjective.new(run_statement)
+      #end
+
+      statements.each { |statement| statement.close if statement }
+      words.close if words
+
+      similar_meaning_words
+    end
+
     private
 
     def check_if_one_database_found(databases_found)
@@ -57,6 +81,21 @@ module German
                        WHERE Entry = '#{word}'").length > 0
       end
     end
+
+    def statements_for_each_database(words, meaning)
+      ['Nouns', 'Verbs', 'Adjectives'].map do |database|
+        statement = words.prepare "SELECT * FROM #{database}
+                                   WHERE Meaning LIKE '% #{meaning} %'
+                                      OR Meaning LIKE '% #{meaning},%'
+                                      OR Meaning LIKE '%#{meaning}'"
+        statement.execute
+      end
+    end
+    #WHERE ',' || Meaning || ',' like '%,#{meaning}%'"
+
+    #WHERE Meaning LIKE
+    #OR Meaning LIKE '%#{meaning}'
+    #OR Meaning LIKE '#{meaning}%'"
 
     def extract_entry_from_concrete_database(words, word, databases_found)
       statement = words.prepare "SELECT * FROM #{databases_found[0]}
@@ -75,6 +114,20 @@ module German
     def close_database(database, statement)
       statement.close if statement
       database.close if database
+    end
+
+    def extract_words_with_similar_meaning(statements)
+      words_containing_meaning = []
+      statements_with_word = statements.zip(['Noun', 'Verb', 'Adjective'])
+
+      statements_with_word.each do |pair|
+        current_class = Object.const_get('German::' + pair.last)
+        pair.first.each do |run_statement|
+          words_containing_meaning << current_class.new(run_statement)
+        end
+      end
+
+      words_containing_meaning
     end
   end
 end

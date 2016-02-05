@@ -7,26 +7,48 @@ require_relative 'adjective'
 
 module German
   class Dictionary
-    def extract_entry(word)
-      words = SQLite3::Database.open 'words.db'
-      words.results_as_hash = true
+    def initialize(database)
+      @database = database
+    end
 
+    def extract_entry(word)
+      words = SQLite3::Database.open @database
       databases_found = locate_database_for_entry(words, word)
 
-      handle_database_cases(words, word, databases_found)
+      check_if_one_database_found(databases_found)
+
+      words.results_as_hash = true
+
+      extract_entry_from_concrete_database(words, word, databases_found)
     end
 
     def add_entry(word)
-      word.add_entry
+      word.add_entry(@database)
+    end
+
+    def exists_entry?(word)
+      words = SQLite3::Database.open @database
+      databases_found = locate_database_for_entry(words, word)
+
+      words.close if words
+
+      not databases_found.empty?
+    end
+
+    def delete_entry(word)
+      words = SQLite3::Database.open @database
+      databases_found = locate_database_for_entry(words, word)
+
+      check_if_one_database_found(databases_found)
+
+      words.execute "DELETE FROM #{databases_found[0]} WHERE Entry = '#{word}'"
     end
 
     private
 
-    def handle_database_cases(words, word, databases_found)
+    def check_if_one_database_found(databases_found)
       raise 'Entry not found' if databases_found.length == 0
-      raise 'Multiple entries found' if databases_found.length > 1
-
-      extract_entry_from_concrete_database(words, word, databases_found)
+      raise 'Multiple entries found' if databases_found.length > 1  
     end
 
     def locate_database_for_entry(words, word)

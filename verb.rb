@@ -13,5 +13,16 @@ module German
       @preposition = database_hash['Preposition']
       @separable = database_hash['Separable']
     end
+
+    def add_entry(database)
+      words = SQLite3::Database.open(database)
+      words.execute "INSERT INTO Verbs VALUES('#{@entry}', '#{@case}',
+                                              '#{@preposition}',
+                                              '#{@separable}',
+                                              '#{@forms}',
+                                              '#{@transitive}',
+                                              '#{@meaning}', '#{@examples}')"
+      words.close if words
+    end
   end
 end

@@ -12,15 +12,14 @@ module German
       @genetive = database_hash['Genetive']
     end
 
-    def add_entry
-      words = SQLite3::Database.open 'words.db'
-      words.execute 'INSERT INTO Nouns VALUES(#{entry},
-                                              #{gender},
-                                              #{plural},
-                                              #{genetive},
-                                              #{meaning},
-                                              #{examples})'
-
+    def add_entry(database)
+      words = SQLite3::Database.open(database)
+      words.execute "INSERT INTO Nouns VALUES('#{@entry}',
+                                              '#{@gender}',
+                                              '#{@plural}',
+                                              '#{@genetive}',
+                                              '#{@meaning}',
+                                              '#{@examples}')"
       words.close if words
     end
   end

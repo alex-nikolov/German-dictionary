@@ -10,6 +10,16 @@ module German
       @comparative = database_hash['Comparative']
       @superlative = database_hash['Superlative']
     end
+
+    def add_entry(database)
+      words = SQLite3::Database.open(database)
+      words.execute "INSERT INTO Adjectives VALUES('#{@entry}',
+                                                   '#{@comparative}',
+                                                   '#{@superlative}',
+                                                   '#{@meaning}',
+                                                   '#{@examples}')"
+      words.close if words
+    end
   end
 end
 

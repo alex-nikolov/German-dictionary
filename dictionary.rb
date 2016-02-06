@@ -18,7 +18,7 @@ module German
 
       words.results_as_hash = true
 
-      extract_entry_from_concrete_database(words, word, databases_found)
+      extract_entry_from_concrete_database(words, word, databases_found[0])
     end
 
     def add_entry(word)
@@ -69,7 +69,6 @@ module German
 
     def edit_entry(entry, field, new_value)
       words = SQLite3::Database.open @database
-      words.results_as_hash = true
 
       found = locate_database_for_entry(words, entry)
 
@@ -123,14 +122,14 @@ module German
       columns
     end
 
-    def extract_entry_from_concrete_database(words, word, databases_found)
-      statement = words.prepare "SELECT * FROM #{databases_found[0]}
+    def extract_entry_from_concrete_database(words, word, database_found)
+      statement = words.prepare "SELECT * FROM #{database_found}
                                  WHERE Entry = '#{word}'"
       run_statement = statement.execute.next
 
       close_database(words, statement)
 
-      case databases_found[0]
+      case database_found
         when 'Nouns' then Noun.new(run_statement)
         when 'Verbs' then Verb.new(run_statement)
         when 'Adjectives' then Adjective.new(run_statement)

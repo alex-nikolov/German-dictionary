@@ -20,6 +20,12 @@ module German
                                                    '#{@examples}')"
       words.close if words
     end
+
+    def to_s
+      "Entry: #{@entry}\nComparative: #{@comparative}\n" +
+        "Superlative: #{@superlative}\nMeaning: #{@meaning}\n" +
+          "Examples: #{examples}"
+    end
   end
 end
 

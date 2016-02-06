@@ -24,5 +24,12 @@ module German
                                               '#{@meaning}', '#{@examples}')"
       words.close if words
     end
+
+    def to_s
+      "Entry: #{@entry}\nCase: #{@case}\nPreposition: #{@preposition}" +
+        "Separable: #{@separable}\nForms: #{@forms}\n" +
+          "Transitive: #{@transitive}\nMeaning: #{@meaning}\n" +
+            "Examples: #{examples}"
+    end
   end
 end

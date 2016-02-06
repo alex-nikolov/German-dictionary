@@ -22,5 +22,10 @@ module German
                                               '#{@examples}')"
       words.close if words
     end
+
+    def to_s
+      "Entry: #{@entry}\nGender: #{@gender}\nPlural: #{@plural}\n" + 
+        "Genetive: #{genetive}\nMeaning: #{@meaning}\nExamples: #{examples}"
+    end
   end
 end

@@ -142,6 +142,104 @@ describe 'Dictionary' do
       dictionary.edit_entry('Haut', 'Examples', original_examples)
       expect(dictionary.extract_entry('Haut').examples).to eq original_examples
     end
+
+    it 'edits the gender of a noun' do
+      original_gender = dictionary.extract_entry('Haut').gender
+      dictionary.edit_entry('Haut', 'Gender', 'der')
+
+      expect(dictionary.extract_entry('Haut').gender).to eq 'der'
+      dictionary.edit_entry('Haut', 'Gender', original_gender)
+      expect(dictionary.extract_entry('Haut').gender).to eq original_gender
+    end
+
+    it 'edits the plural of a noun' do
+      original_plural = dictionary.extract_entry('Haut').plural
+      dictionary.edit_entry('Haut', 'Plural', 'Hauten')
+
+      expect(dictionary.extract_entry('Haut').plural).to eq 'Hauten'
+      dictionary.edit_entry('Haut', 'Plural', original_plural)
+      expect(dictionary.extract_entry('Haut').plural).to eq original_plural
+    end
+
+    it 'edits the genetive of a noun' do
+      original_genetive = dictionary.extract_entry('Haut').genetive
+      dictionary.edit_entry('Haut', 'Genetive', 'Hauten')
+
+      expect(dictionary.extract_entry('Haut').genetive).to eq 'Hauten'
+      dictionary.edit_entry('Haut', 'Genetive', original_genetive)
+      expect(dictionary.extract_entry('Haut').genetive).to eq original_genetive
+    end
+
+    it 'edits the comparative form of an adjective' do
+      original_comparative = dictionary.extract_entry('kalt').comparative
+      dictionary.edit_entry('kalt', 'Comparative', 'comparative')
+
+      expect(dictionary.extract_entry('kalt').comparative).to eq 'comparative'
+      dictionary.edit_entry('kalt', 'Comparative', original_comparative)
+      expect(dictionary.extract_entry('kalt').comparative).to eq original_comparative
+    end
+
+    it 'edits the superlative form of an adjective' do
+      original_superlative = dictionary.extract_entry('kalt').superlative
+      dictionary.edit_entry('kalt', 'Superlative', 'superlative')
+
+      expect(dictionary.extract_entry('kalt').superlative).to eq 'superlative'
+      dictionary.edit_entry('kalt', 'Superlative', original_superlative)
+      expect(dictionary.extract_entry('kalt').superlative).to eq original_superlative
+    end
+
+    it 'edits the case of a verb' do
+      original_case = dictionary.extract_entry('anschauen').case
+      dictionary.edit_entry('anschauen', 'Used_case', 'dat')
+
+      expect(dictionary.extract_entry('anschauen').case).to eq 'dat'
+      dictionary.edit_entry('anschauen', 'Used_case', original_case)
+      expect(dictionary.extract_entry('anschauen').case).to eq original_case
+    end
+
+    it 'edits the preposition used with a verb' do
+      original_preposition = dictionary.extract_entry('anschauen').preposition
+      dictionary.edit_entry('anschauen', 'Preposition', 'auf')
+
+      expect(dictionary.extract_entry('anschauen').preposition).to eq 'auf'
+      dictionary.edit_entry('anschauen', 'Preposition', original_preposition)
+      expect(dictionary.extract_entry('anschauen').preposition).to eq original_preposition
+    end
+
+    it 'edits the quality of a verb to be separable' do
+      original_separable = dictionary.extract_entry('anschauen').separable
+      dictionary.edit_entry('anschauen', 'Separable', 'no')
+
+      expect(dictionary.extract_entry('anschauen').separable).to eq 'no'
+      dictionary.edit_entry('anschauen', 'Separable', original_separable)
+      expect(dictionary.extract_entry('anschauen').separable).to eq original_separable
+    end
+
+    it 'edits the forms of a verb' do
+      original_forms = dictionary.extract_entry('anschauen').forms
+      dictionary.edit_entry('anschauen', 'Forms', 'anschauen-anschun-angeschauen')
+
+      expect(dictionary.extract_entry('anschauen').forms).to eq 'anschauen-anschun-angeschauen'
+      dictionary.edit_entry('anschauen', 'Forms', original_forms)
+      expect(dictionary.extract_entry('anschauen').forms).to eq original_forms
+    end
+
+    it 'edits the quality of a verb to be transitive' do
+      original_transitive = dictionary.extract_entry('anschauen').transitive
+      dictionary.edit_entry('anschauen', 'Transitive', 'no')
+
+      expect(dictionary.extract_entry('anschauen').transitive).to eq 'no'
+      dictionary.edit_entry('anschauen', 'Transitive', original_transitive)
+      expect(dictionary.extract_entry('anschauen').transitive).to eq original_transitive
+    end
+
+    it 'raises an exception when entry is not found' do
+      expect{ dictionary.edit_entry('Missing', 'Forms', '-') }.to raise_error(StandardError, /Entry not found/)
+    end
+
+    it 'raises an exception when attempting to edit an invalid field' do
+      expect{ dictionary.edit_entry('kalt', 'Forms', '-') }.to raise_error(StandardError, /Invalid field/)
+    end
   end
 end
 

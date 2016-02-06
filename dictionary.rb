@@ -1,4 +1,3 @@
-require 'io/console'
 require 'sqlite3'
 
 require_relative 'noun'
@@ -68,6 +67,19 @@ module German
       similar_meaning_words
     end
 
+    def edit_entry(entry, field, new_value)
+      words = SQLite3::Database.open @database
+      words.results_as_hash = true
+
+      found = locate_database_for_entry(words, entry)
+
+      check_if_one_database_found(found)
+      raise 'Invalid field' unless table_columns(words, found[0]).include? field
+
+      statement = update_field_statement(found, entry, field, new_value, words)
+      close_database(words, statement)
+    end
+
     private
 
     def check_if_one_database_found(databases_found)
@@ -91,11 +103,25 @@ module German
         statement.execute
       end
     end
+
+    def update_field_statement(found, entry, field, new_value, database)
+      statement = database.prepare "UPDATE #{found[0]}
+                                    SET #{field} = '#{new_value}'
+                                    WHERE Entry = '#{entry}'"
+      statement.execute
+    end
     #WHERE ',' || Meaning || ',' like '%,#{meaning}%'"
 
     #WHERE Meaning LIKE
     #OR Meaning LIKE '%#{meaning}'
     #OR Meaning LIKE '#{meaning}%'"
+    def table_columns(database, table_name)
+      statement = database.prepare "SELECT * FROM #{table_name} LIMIT 1"
+
+      columns = statement.columns
+      statement.close if statement
+      columns
+    end
 
     def extract_entry_from_concrete_database(words, word, databases_found)
       statement = words.prepare "SELECT * FROM #{databases_found[0]}

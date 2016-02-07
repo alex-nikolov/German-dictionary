@@ -118,7 +118,7 @@ module German
       field_data.unshift(word)
 
       common_fields = enter_meaning_and_examples
-      field_names = ['Entry'] + field_names.map { |field| field.capitalize }
+      field_names.map! { |field| field.capitalize }.unshift('Entry')
       field_names = field_names.join(',').gsub('Case', 'Used_case').split(',')
 
       Hash[field_names.zip field_data].merge(common_fields)

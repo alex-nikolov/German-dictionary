@@ -77,7 +77,7 @@ module German
 
     def locate_database_for_entry(words, word)
       ['Nouns', 'Verbs', 'Adjectives'].keep_if do |database|
-        words.execute("SELECT 1 FROM #{database}
+        words.execute("SELECT * FROM #{database}
                        WHERE Entry = '#{word}'").length > 0
       end
     end

@@ -16,12 +16,13 @@ module German
       loop do
         user_input = gets.chomp
 
+        arguments = user_input.split(' ')
         case user_input
           when 'help' then help
-          when /extract\s+(.+)/ then extract(user_input.split(' ')[1])
-          when /add-word\s+(.+)/ then add(user_input.split(' ')[1])
-          when /edit\s+(.+)/ then edit(user_input.split(' ')[1])
-          when /delete\s+(.+)/ then delete(user_input.split('delete')[1])
+          when /extract\s+(.+)/ then extract(arguments[1])
+          when /add-word\s+(.+)/ then add(arguments[1])
+          when /edit\s+(.+)/ then edit(arguments[1..-1])
+          when /delete\s+(.+)/ then delete(arguments[1])
           when 'q' then break
           else 
             puts "Command '#{user_input}' not recognized."
@@ -87,25 +88,29 @@ module German
       add_new_word_and_print_success_message(new_adjective)
     end
 
+    def delete(word)
+      @dictionary.delete_entry(word)
+    rescue StandardError => e
+      puts e.message
+    else
+      puts "Entry '#{word}' successfully deleted"
+    end
+
+    def edit(arguments)
+      word, field, new_value = arguments
+      field.capitalize!
+      @dictionary.edit_entry(word, field, new_value)
+    rescue StandardError => e
+      puts e.message
+    else
+      puts "Entry '#{word}' successfully edited"
+    end
+
     private
 
     def add_new_word_and_print_success_message(new_word)
       @dictionary.add_entry(new_word)
       puts "Entry '#{new_word.entry}' successfully added"
-    end
-
-    def new_verb_hash(word)
-      verb_fields = ['case', 'preposition', 'separable', 'forms', 'transitive']
-
-      field_data = verb_fields.map { |field| enter_field(field) }
-      field_data.unshift(word)
-
-      common_fields = enter_meaning_and_examples
-
-      field_names = ['Entry', 'Used_case', 'Preposition', 'Separable',
-                     'Forms', 'Transitive' ]
-      
-      Hash[field_names.zip field_data].merge(common_fields)
     end
 
     def new_word_hash(word, field_names)

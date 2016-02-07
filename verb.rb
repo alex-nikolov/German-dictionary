@@ -26,7 +26,7 @@ module German
     end
 
     def to_s
-      "Entry: #{@entry}\nCase: #{@case}\nPreposition: #{@preposition}" +
+      "Entry: #{@entry}\nCase: #{@case}\nPreposition: #{@preposition}\n" +
         "Separable: #{@separable}\nForms: #{@forms}\n" +
           "Transitive: #{@transitive}\nMeaning: #{@meaning}\n" +
             "Examples: #{examples}"

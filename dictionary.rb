@@ -49,17 +49,6 @@ module German
       statements = statements_for_each_database(words, meaning)
 
       similar_meaning_words = extract_words_with_similar_meaning(statements)
-      #statements[0].each do |run_statement|
-      #  words_containing_meaning << Noun.new(run_statement)
-      #end
-
-      #statements[1].each do |run_statement|
-      #  words_containing_meaning << Verb.new(run_statement)
-      #end
-
-      #statements[2].each do |run_statement|
-      #  words_containing_meaning << Adjective.new(run_statement)
-      #end
 
       statements.each { |statement| statement.close if statement }
       words.close if words

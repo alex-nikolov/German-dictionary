@@ -66,62 +66,57 @@ module German
     end
 
     def add_noun(word)
-      word_hash = new_noun_hash(word)
+      word_hash = new_word_hash(word, ['gender', 'plural', 'genetive'])
 
       new_noun = Noun.new(word_hash)
-      @dictionary.add_entry(new_noun)
-      puts "Entry '#{word}' successfully added"
+      add_new_word_and_print_success_message(new_noun)
     end
 
     def add_verb(word)
-      word_hash = new_verb_hash(word)
+      word_hash = new_word_hash(word, ['case', 'preposition', 'separable',
+                                       'forms', 'transitive'])
 
       new_verb = Verb.new(word_hash)
-      @dictionary.add_entry(new_verb)
-      puts "Entry '#{word}' successfully added"
+      add_new_word_and_print_success_message(new_verb)
     end
 
     def add_adjective(word)
-      word_hash = new_adjective_hash(word)
+      word_hash = new_word_hash(word, ['comparative', 'superlative'])
 
       new_adjective = Adjective.new(word_hash)
-      @dictionary.add_entry(new_adjective)
-      puts "Entry '#{word}' successfully added"
+      add_new_word_and_print_success_message(new_adjective)
     end
 
     private
 
-    def new_noun_hash(word)
-      field_data = ['gender', 'plural', 'genetive'].map do |field|
-        enter_field(field)
-      end
-
-      common_fields = enter_meaning_and_examples
-
-      { 'Entry' => word, 'Gender' => field_data[0],
-        'Plural' => field_data[1], 'Genetive' => field_data[2],
-      }.merge(common_fields)
+    def add_new_word_and_print_success_message(new_word)
+      @dictionary.add_entry(new_word)
+      puts "Entry '#{new_word.entry}' successfully added"
     end
 
     def new_verb_hash(word)
       verb_fields = ['case', 'preposition', 'separable', 'forms', 'transitive']
+
       field_data = verb_fields.map { |field| enter_field(field) }
+      field_data.unshift(word)
+
       common_fields = enter_meaning_and_examples
 
-      { 'Entry' => word, 'Used_case' => field_data[0],
-        'Preposition' => field_data[1], 'Separable' => field_data[2],
-        'Forms' => field_data[3], 'Transitive' => field_data[4],
-      }.merge(common_fields)
-
+      field_names = ['Entry', 'Used_case', 'Preposition', 'Separable',
+                     'Forms', 'Transitive' ]
+      
+      Hash[field_names.zip field_data].merge(common_fields)
     end
 
-    def new_adjective_hash(word)
-      field_data = ['comparative', 'superlative'].map { |f| enter_field(f) }
-      common_fields = enter_meaning_and_examples
+    def new_word_hash(word, field_names)
+      field_data = field_names.map { |field| enter_field(field) }
+      field_data.unshift(word)
 
-      { 'Entry' => word, 'Comparative' => field_data[0],
-        'Superlative' => field_data[1]
-      }.merge(common_fields)
+      common_fields = enter_meaning_and_examples
+      field_names = ['Entry'] + field_names.map { |field| field.capitalize }
+      field_names = field_names.join(',').gsub('Case', 'Used_case').split(',')
+
+      Hash[field_names.zip field_data].merge(common_fields)
     end
 
     def enter_meaning_and_examples

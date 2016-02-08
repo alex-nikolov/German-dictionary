@@ -6,11 +6,7 @@ require_relative 'adjective'
 
 module German
   class Quiz
-<<<<<<< HEAD
-    attr_accessor :words_to_be_guessed
-=======
     attr_accessor :words_to_be_guessed, :current_word
->>>>>>> cli
 
     def initialize(parts_of_speech, database, fields_to_be_guessed)
       @database = database
@@ -24,30 +20,19 @@ module German
 
     def guess(suggestions)
       suggestions_with_fields = suggestions.zip @fields_to_be_guessed
-<<<<<<< HEAD
-=======
 
->>>>>>> cli
       suggestion_correctness = suggestions_with_fields.map do |pair|
         correct_answer = @current_word.method(pair.last).call
         evaluate_correctness_of_suggestion(pair, correct_answer)
       end
-<<<<<<< HEAD
-      update_score(suggestion_correctness)
-      @current_word = @words_to_be_guessed.shuffle.pop
-=======
 
       update_score(suggestion_correctness)
       pick_new_current_word
->>>>>>> cli
 
       suggestion_correctness
     end
 
     def score
-<<<<<<< HEAD
-      @total_answers == 0 ? 0 : @right_answers / @total_answers
-=======
       if @total_answers == 0
         0
       else
@@ -61,13 +46,10 @@ module German
 
     def correct_answer?(answer)
       answer == 'Correct'
->>>>>>> cli
     end
 
     private
 
-<<<<<<< HEAD
-=======
     def pick_new_current_word
       if @total_answers == 1
         @words_to_be_guessed.shift
@@ -77,17 +59,12 @@ module German
       @current_word = @words_to_be_guessed.shift
     end
 
->>>>>>> cli
     def update_score(suggestion_correctness)
       right_answers = 0
       total_answers = suggestion_correctness.size
 
       suggestion_correctness.each do |correctness|
-<<<<<<< HEAD
-        right_answers += 1 unless correctness == 0
-=======
         right_answers += 1 unless correctness.first == 0
->>>>>>> cli
       end
 
       @right_answers += right_answers / total_answers.to_f
@@ -96,19 +73,11 @@ module German
 
     def evaluate_correctness_of_suggestion(suggestion_with_field, correct_answer)
       if suggestion_with_field.first == correct_answer
-<<<<<<< HEAD
-        1
-      elsif /\b#{suggestion_with_field.first}\b/ =~ correct_answer
-        correct_answer
-      else
-        0
-=======
         [1, 'Correct']
       elsif /\b#{suggestion_with_field.first}\b/ =~ correct_answer
         [0.5, correct_answer]
       else
         [0, correct_answer]
->>>>>>> cli
       end
     end
 

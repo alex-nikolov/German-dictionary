@@ -48,6 +48,20 @@ module German
       answer == 'Correct'
     end
 
+    def not_guessed_answers(guess_correctness)
+      correct_answers = guess_correctness.map { |assessment| assessment.last }
+      correct_answers.select! { |answer| not correct_answer? answer }
+      correct_answers.map { |answer| "'" + answer + "'" }.join(', ')
+    end
+
+    def all_guessed?(guess_correctness)
+      guess_correctness.all? { |pair| pair.first == 1 }
+    end
+
+    def nothing_guessed?(guess_correctness)
+      guess_correctness.all? { |pair| pair.first == 0 }
+    end
+
     private
 
     def pick_new_current_word

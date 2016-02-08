@@ -189,23 +189,17 @@ module German
     end
 
     def handle_guess_correctness(quiz, guess_correctness)
-      only_ones = guess_correctness.all? { |pair| pair.first == 1 }
-      only_zeros = guess_correctness.all? { |pair| pair.first == 0 }
-      answers = extract_not_guessed_answers(quiz, guess_correctness)
+      everything_guessed = quiz.all_guessed?(guess_correctness)
+      nothing_guessed = quiz.nothing_guessed?(guess_correctness)
+      answers = quiz.not_guessed_answers(guess_correctness)
 
-      if only_ones
+      if everything_guessed
         puts 'Correct!'
-      elsif only_zeros
+      elsif nothing_guessed
         puts "Sorry, that's not it, the answers are #{answers}"
       else
         puts "Almost, it's actually #{answers}"
       end
-    end
-
-    def extract_not_guessed_answers(quiz, guess_correctness)
-      correct_answers = guess_correctness.map { |assessment| assessment.last }
-      correct_answers.select! { |answer| not quiz.correct_answer? answer }
-      correct_answers.map { |answer| "'" + answer + "'" }.join(', ')
     end
   end
 end

@@ -1,6 +1,7 @@
 require 'io/console'
 
 require_relative 'dictionary'
+require_relative 'quiz'
 
 module German
   class ConsoleInterface
@@ -15,28 +16,23 @@ module German
 
       loop do
         user_input = gets.chomp
+        break if user_input == 'q'
 
         arguments = user_input.split(' ')
-        case user_input
-          when 'help' then help
-          when /extract\s+(.+)/ then extract(arguments[1])
-          when /add-word\s+(.+)/ then add(arguments[1])
-          when /edit\s+(.+)/ then edit(arguments[1..-1])
-          when /delete\s+(.+)/ then delete(arguments[1])
-          when 'q' then break
-          else 
-            puts "Command '#{user_input}' not recognized."
-            puts "If you need help, type 'help'"
-        end
+
+        menu(user_input, arguments)
       end
     end
 
     def help
       puts 'The following commands are available:'
       puts '  extract <word> - displays a word from the dictionary'
-      puts '  add-word - starts the process of adding a new word to the dictionary'
+      puts '  add-word - adds a new word to the dictionary'
       puts "  edit <word> <field> <new_value> - edit an existing entry's field"
       puts '  delete <word> - deletes a word from the dictionary'
+      puts 'The following quiz modes are supported:'
+      puts '  quiz meaning - test your knowledge on word meanings'
+      puts '  quiz nouns - test your knowledge on noun genders and plurals'
     end
 
     def extract(word)
@@ -59,12 +55,36 @@ module German
         puts "'#{user_input}' is not a supported part of speech"
       end
 
-      case user_input
-        when 'noun' then add_noun(word)
-        when 'verb' then add_verb(word)
-        when 'adj' then add_adjective(word)
-      end
+      handle_different_parts_of_speech(user_input)
     end
+
+    def delete(word)
+      @dictionary.delete_entry(word)
+    rescue StandardError => e
+      puts e.message
+    else
+      puts "Entry '#{word}' successfully deleted"
+    end
+
+    def edit(arguments)
+      word, field, new_value = arguments
+      field.capitalize!
+      @dictionary.edit_entry(word, field, new_value)
+    rescue StandardError => e
+      puts e.message
+    else
+      puts "Entry '#{word}' successfully edited"
+    end
+
+    def quiz_meaning
+      quiz(['Noun', 'Adjective', 'Verb'], ['meaning'])
+    end
+
+    def quiz_nouns
+      quiz(['Noun'], ['gender', 'plural'])
+    end
+
+    private
 
     def add_noun(word)
       word_hash = new_word_hash(word, ['gender', 'plural', 'genetive'])
@@ -88,25 +108,22 @@ module German
       add_new_word_and_print_success_message(new_adjective)
     end
 
-    def delete(word)
-      @dictionary.delete_entry(word)
-    rescue StandardError => e
-      puts e.message
-    else
-      puts "Entry '#{word}' successfully deleted"
-    end
+    def quiz(parts_of_speech, tested_fields)
+      quiz = Quiz.new(parts_of_speech, @dictionary.database, tested_fields)
 
-    def edit(arguments)
-      word, field, new_value = arguments
-      field.capitalize!
-      @dictionary.edit_entry(word, field, new_value)
-    rescue StandardError => e
-      puts e.message
-    else
-      puts "Entry '#{word}' successfully edited"
-    end
+      until quiz.empty?
+        suggestions = tested_fields.map do |field|
+          user_input_in_quiz(quiz, field)
+        end
+        
+        break if suggestions.include? 'q'
 
-    private
+        guess_correctness = quiz.guess(suggestions)
+        handle_guess_correctness(quiz, guess_correctness)
+      end
+
+      display_score(quiz)
+    end
 
     def add_new_word_and_print_success_message(new_word)
       @dictionary.add_entry(new_word)
@@ -134,6 +151,61 @@ module German
     def enter_field(field_name)
       puts "Enter the word's #{field_name}: "
       field_value = gets.chomp
+    end
+
+    def menu(user_input, arguments)
+      case user_input
+        when 'help' then help
+        when /extract\s+(.+)/ then extract(arguments[1])
+        when /add-word\s+(.+)/ then add(arguments[1])
+        when /edit\s+(.+)/ then edit(arguments[1..-1])
+        when /delete\s+(.+)/ then delete(arguments[1])
+        when 'quiz meaning' then quiz_meaning
+        when 'quiz nouns' then quiz_nouns
+        else invalid_command(user_input)
+      end
+    end
+
+    def invalid_command(command)
+      puts "Command '#{command}' not recognized."
+      puts "If you need help, type 'help'"
+    end
+
+    def handle_different_parts_of_speec(user_input)
+      case user_input
+        when 'noun' then add_noun(word)
+        when 'verb' then add_verb(word)
+        when 'adj' then add_adjective(word)
+      end
+    end
+
+    def user_input_in_quiz(quiz, field)
+      puts "Enter supposed #{field} of #{quiz.current_word.entry}"
+      user_input = gets.chomp
+    end
+
+    def display_score(quiz)
+      puts "Quiz finished. Your score is #{quiz.score}%"
+    end
+
+    def handle_guess_correctness(quiz, guess_correctness)
+      only_ones = guess_correctness.all? { |pair| pair.first == 1 }
+      only_zeros = guess_correctness.all? { |pair| pair.first == 0 }
+      answers = extract_not_guessed_answers(quiz, guess_correctness)
+
+      if only_ones
+        puts 'Correct!'
+      elsif only_zeros
+        puts "Sorry, that's not it, the answers are #{answers}"
+      else
+        puts "Almost, it's actually #{answers}"
+      end
+    end
+
+    def extract_not_guessed_answers(quiz, guess_correctness)
+      correct_answers = guess_correctness.map { |assessment| assessment.last }
+      correct_answers.select! { |answer| not quiz.correct_answer? answer }
+      correct_answers.map { |answer| "'" + answer + "'" }.join(', ')
     end
   end
 end

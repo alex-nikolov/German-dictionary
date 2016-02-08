@@ -6,6 +6,8 @@ require_relative 'adjective'
 
 module German
   class Dictionary
+    attr_reader :database
+
     def initialize(database)
       @database = database
     end

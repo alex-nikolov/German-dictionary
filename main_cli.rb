@@ -123,6 +123,7 @@ module German
       end
 
       display_score(quiz)
+      configure_highscore(quiz.score)
     end
 
     def add_new_word_and_print_success_message(new_word)
@@ -200,6 +201,10 @@ module German
       else
         puts "Almost, it's actually #{answers}"
       end
+    end
+
+    def configure_highscore()
+      
     end
   end
 end

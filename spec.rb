@@ -21,7 +21,7 @@ describe 'Dictionary' do
     end
 
     it 'raises exception when entry was not found' do
-      expect { baum = dictionary.extract_entry 'Baum' }.to raise_error(StandardError, /Entry not found/)
+      expect { baum = dictionary.extract_entry 'Baum' }.to raise_error(German::DictionaryError, /Entry not found/)
     end
   end
 
@@ -234,11 +234,11 @@ describe 'Dictionary' do
     end
 
     it 'raises an exception when entry is not found' do
-      expect{ dictionary.edit_entry('Missing', 'Forms', '-') }.to raise_error(StandardError, /Entry not found/)
+      expect{ dictionary.edit_entry('Missing', 'Forms', '-') }.to raise_error(German::DictionaryError, /Entry not found/)
     end
 
     it 'raises an exception when attempting to edit an invalid field' do
-      expect{ dictionary.edit_entry('kalt', 'Forms', '-') }.to raise_error(StandardError, /Invalid field/)
+      expect{ dictionary.edit_entry('kalt', 'Forms', '-') }.to raise_error(German::DictionaryError, /Invalid field/)
     end
   end
 end

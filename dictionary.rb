@@ -5,6 +5,9 @@ require_relative 'verb'
 require_relative 'adjective'
 
 module German
+  class DictionaryError < StandardError
+  end
+
   class Dictionary
     attr_reader :database
 
@@ -64,7 +67,9 @@ module German
       found = locate_database_for_entry(words, entry)
 
       check_if_one_database_found(found)
-      raise 'Invalid field' unless table_columns(words, found[0]).include? field
+      unless table_columns(words, found[0]).include? field
+        raise DictionaryError, 'Invalid field'
+      end
 
       statement = update_field_statement(found, entry, field, new_value, words)
       close_database(words, statement)
@@ -73,8 +78,11 @@ module German
     private
 
     def check_if_one_database_found(databases_found)
-      raise 'Entry not found' if databases_found.length == 0
-      raise 'Multiple entries found' if databases_found.length > 1  
+      raise DictionaryError, 'Entry not found' if databases_found.length == 0
+
+      if databases_found.length > 1
+        raise DictionaryError, 'Multiple entries found'
+      end
     end
 
     def locate_database_for_entry(words, word)

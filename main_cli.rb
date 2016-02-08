@@ -77,28 +77,11 @@ module German
     end
 
     def quiz_meaning
-      quiz = Quiz.new(['Noun', 'Adjective', 'Verb'],
-                      @dictionary.database, 
-                      ['meaning'])
-      until quiz.empty?
-        puts "Enter supposed meaning of #{quiz.current_word.entry}"
-        user_input = gets.chomp
+      quiz(['Noun', 'Adjective', 'Verb'], ['meaning'])
+    end
 
-        if user_input == 'q'
-          puts "Your score is #{quiz.score}"
-          break
-        end
-
-        guess_correctness = quiz.guess([user_input])
-
-        case guess_correctness[0]
-          when 1 then puts 'Correct!'
-          when 0 then puts "Sorry, that's not it."
-          else puts "Almost, the answer is '#{guess_correctness[0]}'"
-        end
-      end
-
-      puts "Quiz finished. Your score is #{quiz.score}%"
+    def quiz_nouns
+      quiz(['Noun'], ['gender', 'plural'])
     end
 
     private
@@ -123,6 +106,23 @@ module German
 
       new_adjective = Adjective.new(word_hash)
       add_new_word_and_print_success_message(new_adjective)
+    end
+
+    def quiz(parts_of_speech, tested_fields)
+      quiz = Quiz.new(parts_of_speech, @dictionary.database, tested_fields)
+
+      until quiz.empty?
+        suggestions = tested_fields.map do |field|
+          user_input_in_quiz(quiz, field)
+        end
+        
+        break if suggestions.include? 'q'
+
+        guess_correctness = quiz.guess(suggestions)
+        handle_guess_correctness(quiz, guess_correctness)
+      end
+
+      display_score(quiz)
     end
 
     def add_new_word_and_print_success_message(new_word)
@@ -177,6 +177,35 @@ module German
         when 'verb' then add_verb(word)
         when 'adj' then add_adjective(word)
       end
+    end
+
+    def user_input_in_quiz(quiz, field)
+      puts "Enter supposed #{field} of #{quiz.current_word.entry}"
+      user_input = gets.chomp
+    end
+
+    def display_score(quiz)
+      puts "Quiz finished. Your score is #{quiz.score}%"
+    end
+
+    def handle_guess_correctness(quiz, guess_correctness)
+      only_ones = guess_correctness.all? { |pair| pair.first == 1 }
+      only_zeros = guess_correctness.all? { |pair| pair.first == 0 }
+      answers = extract_not_guessed_answers(quiz, guess_correctness)
+
+      if only_ones
+        puts 'Correct!'
+      elsif only_zeros
+        puts "Sorry, that's not it, the answers are #{answers}"
+      else
+        puts "Almost, it's actually #{answers}"
+      end
+    end
+
+    def extract_not_guessed_answers(quiz, guess_correctness)
+      correct_answers = guess_correctness.map { |assessment| assessment.last }
+      correct_answers.select! { |answer| not quiz.correct_answer? answer }
+      correct_answers.map { |answer| "'" + answer + "'" }.join(', ')
     end
   end
 end

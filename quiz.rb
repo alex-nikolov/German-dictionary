@@ -20,10 +20,12 @@ module German
 
     def guess(suggestions)
       suggestions_with_fields = suggestions.zip @fields_to_be_guessed
+
       suggestion_correctness = suggestions_with_fields.map do |pair|
         correct_answer = @current_word.method(pair.last).call
         evaluate_correctness_of_suggestion(pair, correct_answer)
       end
+
       update_score(suggestion_correctness)
       pick_new_current_word
 
@@ -31,11 +33,19 @@ module German
     end
 
     def score
-      @total_answers == 0 ? 0 : @right_answers / @total_answers.to_f * 100
+      if @total_answers == 0
+        0
+      else
+        (@right_answers / @total_answers.to_f * 100).round(2)
+      end
     end
 
     def empty?
       @words_to_be_guessed.empty?
+    end
+
+    def correct_answer?(answer)
+      answer == 'Correct'
     end
 
     private
@@ -54,7 +64,7 @@ module German
       total_answers = suggestion_correctness.size
 
       suggestion_correctness.each do |correctness|
-        right_answers += 1 unless correctness == 0
+        right_answers += 1 unless correctness.first == 0
       end
 
       @right_answers += right_answers / total_answers.to_f
@@ -63,11 +73,11 @@ module German
 
     def evaluate_correctness_of_suggestion(suggestion_with_field, correct_answer)
       if suggestion_with_field.first == correct_answer
-        1
+        [1, 'Correct']
       elsif /\b#{suggestion_with_field.first}\b/ =~ correct_answer
-        correct_answer
+        [0.5, correct_answer]
       else
-        0
+        [0, correct_answer]
       end
     end
 

@@ -30,7 +30,8 @@ module German
     end
 
     def self.top_five_highscores_to_s(database, quiz_name)
-      self.highscores(databse, quiz_name, 'LIMIT 5 ORDER BY Highscore DESC')
+      additional_attribute = " ORDER BY Highscore DESC LIMIT 5"
+      self.highscores(database, quiz_name, additional_attribute)
     end
 
     def self.reset(database, quiz_name)

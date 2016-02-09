@@ -2,25 +2,29 @@ require 'io/console'
 
 require_relative 'dictionary'
 require_relative 'quiz'
+require_relative 'highscore'
 
 module German
   class ConsoleInterface
-    def initialize(database)
-      @dictionary = Dictionary.new(database)
+    def initialize(dictionary_database, quiz_database)
+      @dictionary = Dictionary.new(dictionary_database)
+      @quiz_database = quiz_database
 
-      start
+      main_menu
     end
 
-    def start
-      puts "Welcome! If you need help with the commands, simply type 'help'"
+    def main_menu(new_start = true)
+      if new_start
+        puts "Welcome! If you need help with the commands, simply type 'help'"
+      end
 
       loop do
         user_input = gets.chomp
-        break if user_input == 'q'
+        exit if user_input == 'q'
 
         arguments = user_input.split(' ')
 
-        menu(user_input, arguments)
+        menu_cases(user_input, arguments)
       end
     end
 
@@ -30,14 +34,12 @@ module German
       puts '  add-word - adds a new word to the dictionary'
       puts "  edit <word> <field> <new_value> - edit an existing entry's field"
       puts '  delete <word> - deletes a word from the dictionary'
-      puts 'The following quiz modes are supported:'
-      puts '  quiz meaning - test your knowledge on word meanings'
-      puts '  quiz nouns - test your knowledge on noun genders and plurals'
+      puts '  quiz mode - enter quiz mode where you can test your knowledge'
     end
 
     def extract(word)
       extracted_word = @dictionary.extract_entry(word)
-    rescue StandardError => e
+    rescue DictionaryError => e
       puts e.message
     else
       puts extracted_word.to_s
@@ -60,7 +62,7 @@ module German
 
     def delete(word)
       @dictionary.delete_entry(word)
-    rescue StandardError => e
+    rescue DictionaryError => e
       puts e.message
     else
       puts "Entry '#{word}' successfully deleted"
@@ -70,18 +72,18 @@ module German
       word, field, new_value = arguments
       field.capitalize!
       @dictionary.edit_entry(word, field, new_value)
-    rescue StandardError => e
+    rescue DictionaryError => e
       puts e.message
     else
       puts "Entry '#{word}' successfully edited"
     end
 
     def quiz_meaning
-      quiz(['Noun', 'Adjective', 'Verb'], ['meaning'])
+      quiz(['Noun', 'Adjective', 'Verb'], ['meaning'], 'Meanings')
     end
 
     def quiz_nouns
-      quiz(['Noun'], ['gender', 'plural'])
+      quiz(['Noun'], ['gender', 'plural'], 'Nouns')
     end
 
     private
@@ -108,7 +110,7 @@ module German
       add_new_word_and_print_success_message(new_adjective)
     end
 
-    def quiz(parts_of_speech, tested_fields)
+    def quiz(parts_of_speech, tested_fields, quiz_name)
       quiz = Quiz.new(parts_of_speech, @dictionary.database, tested_fields)
 
       until quiz.empty?
@@ -123,7 +125,7 @@ module German
       end
 
       display_score(quiz)
-      configure_highscore(quiz.score)
+      configure_highscore(quiz.score, quiz_name)
     end
 
     def add_new_word_and_print_success_message(new_word)
@@ -154,7 +156,7 @@ module German
       field_value = gets.chomp
     end
 
-    def menu(user_input, arguments)
+    def menu_cases(user_input, arguments)
       case user_input
         when 'help' then help
         when /extract\s+(.+)/ then extract(arguments[1])
@@ -162,25 +164,35 @@ module German
         when /edit\s+(.+)/ then edit(arguments[1..-1])
         when /delete\s+(.+)/ then delete(arguments[1])
         when 'quiz mode' then quiz_mode
-        #when 'quiz nouns' then quiz_nouns
         else invalid_command(user_input)
       end
     end
 
     def quiz_mode
+      quiz_help
+
       loop do
         user_input = gets.chomp
-        menu if user_input == 'q'
+        if user_input == 'q'
+          puts 'Switching back to main menu'
+          main_menu(false)
+        end
 
         arguments = user_input.split(' ')
 
-        quiz_menu(user_input, arguments)
+        quiz_menu_cases(user_input, arguments)
       end
     end
 
-    def quiz_menu(user_input)
+    def quiz_menu_cases(user_input, arguments)
       case user_input
         when 'help' then quiz_help
+        when 'quiz meanings' then quiz_meaning
+        when 'quiz nouns' then quiz_nouns
+        when /highscore(.+)top/ then top_highscores(arguments[1])
+        when /highscore(.+)all/ then all_highscores(arguments[1])
+        when 'q' then main_menu(false)
+        else invalid_command(user_input)
       end
     end
 
@@ -192,6 +204,15 @@ module German
       puts '  quiz nouns - test your knowledge on noun genders and plurals'
       puts '  highscore <name> top - view the top 5 highscores' + from_quiz
       puts '  highscore <name> all - view all scores' + from_quiz
+    end
+
+    def top_highscores(quiz_name)
+      capitalized = quiz_name.capitalize
+      puts Highscore.top_five_highscores_to_s(@quiz_database, capitalized)
+    end
+
+    def all_highscores(quiz_name)
+      puts Highscore.highscores_to_s(@quiz_database, quiz_name.capitalize)
     end
 
     def invalid_command(command)
@@ -221,7 +242,8 @@ module German
       nothing_guessed = quiz.nothing_guessed?(guess_correctness)
       answers = quiz.not_guessed_answers(guess_correctness)
 
-      puts 'Correct!' if everything_guessed
+      if everything_guessed
+        puts 'Correct!'
       elsif nothing_guessed
         puts "Sorry, that's not it, the answers are #{answers}"
       else
@@ -229,12 +251,18 @@ module German
       end
     end
 
-    def configure_highscore()
-      
+    def configure_highscore(score, quiz_name)
+      puts 'Enter name for new score'
+      name = gets.chomp
+
+      new_score = Highscore.new(score, @quiz_database, name, quiz_name)
+      new_score.write_to_table
+
+      puts 'Score successfully added'
     end
   end
 end
 
-German::ConsoleInterface.new('examples.db')
+German::ConsoleInterface.new('examples.db', 'highscores.db')
 #input = gets.chomp
 #puts 5 if input == '3'

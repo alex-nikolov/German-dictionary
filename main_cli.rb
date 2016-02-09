@@ -161,10 +161,37 @@ module German
         when /add-word\s+(.+)/ then add(arguments[1])
         when /edit\s+(.+)/ then edit(arguments[1..-1])
         when /delete\s+(.+)/ then delete(arguments[1])
-        when 'quiz meaning' then quiz_meaning
-        when 'quiz nouns' then quiz_nouns
+        when 'quiz mode' then quiz_mode
+        #when 'quiz nouns' then quiz_nouns
         else invalid_command(user_input)
       end
+    end
+
+    def quiz_mode
+      loop do
+        user_input = gets.chomp
+        menu if user_input == 'q'
+
+        arguments = user_input.split(' ')
+
+        quiz_menu(user_input, arguments)
+      end
+    end
+
+    def quiz_menu(user_input)
+      case user_input
+        when 'help' then quiz_help
+      end
+    end
+
+    def quiz_help
+      from_quiz = 'from a particular quiz'
+
+      puts 'The following commands are supported:'
+      puts '  quiz meaning - test your knowledge on word meanings'
+      puts '  quiz nouns - test your knowledge on noun genders and plurals'
+      puts '  highscore <name> top - view the top 5 highscores' + from_quiz
+      puts '  highscore <name> all - view all scores' + from_quiz
     end
 
     def invalid_command(command)
@@ -172,7 +199,7 @@ module German
       puts "If you need help, type 'help'"
     end
 
-    def handle_different_parts_of_speec(user_input)
+    def handle_different_parts_of_speech(user_input)
       case user_input
         when 'noun' then add_noun(word)
         when 'verb' then add_verb(word)
@@ -194,8 +221,7 @@ module German
       nothing_guessed = quiz.nothing_guessed?(guess_correctness)
       answers = quiz.not_guessed_answers(guess_correctness)
 
-      if everything_guessed
-        puts 'Correct!'
+      puts 'Correct!' if everything_guessed
       elsif nothing_guessed
         puts "Sorry, that's not it, the answers are #{answers}"
       else

@@ -6,9 +6,9 @@ require_relative 'highscore'
 
 module German
   class ConsoleInterface
-    def initialize(dictionary_database, quiz_database)
+    def initialize(dictionary_database, highscore_database)
       @dictionary = Dictionary.new(dictionary_database)
-      @quiz_database = quiz_database
+      @highscore_database = highscore_database
 
       main_menu
     end
@@ -208,11 +208,11 @@ module German
 
     def top_highscores(quiz_name)
       capitalized = quiz_name.capitalize
-      puts Highscore.top_five_highscores_to_s(@quiz_database, capitalized)
+      puts Highscore.top_five_highscores_to_s(@highscore_database, capitalized)
     end
 
     def all_highscores(quiz_name)
-      puts Highscore.highscores_to_s(@quiz_database, quiz_name.capitalize)
+      puts Highscore.highscores_to_s(@highscore_database, quiz_name.capitalize)
     end
 
     def invalid_command(command)
@@ -255,7 +255,7 @@ module German
       puts 'Enter name for new score'
       name = gets.chomp
 
-      new_score = Highscore.new(score, @quiz_database, name, quiz_name)
+      new_score = Highscore.new(score, @highscore_database, name, quiz_name)
       new_score.write_to_table
 
       puts 'Score successfully added'

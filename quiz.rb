@@ -6,7 +6,7 @@ require_relative 'adjective'
 
 module German
   class Quiz
-    attr_accessor :words_to_be_guessed, :current_word
+    attr_accessor :words_to_be_guessed, :current_word, :fields_to_be_guessed
 
     def initialize(parts_of_speech, database, fields_to_be_guessed)
       @database = database

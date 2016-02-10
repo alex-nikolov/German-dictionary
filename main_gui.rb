@@ -16,6 +16,7 @@ module German
         draw_view_word_button(self)
         draw_add_word_button(self)
         draw_edit_word_button(self)
+        draw_delete_word_button(self)
       end
     end
 
@@ -233,6 +234,39 @@ module German
       @shoes.alert('Changes saved successfully')
       @part_of_speech.clear
       @new_value.clear
+    end
+
+    def draw_delete_word_button(owner)
+      @shoes.button 'Delete word', width: 0.15, height: 1.0 do
+        @shoes.window(title: 'Delete word', width: 300, height: 250) do
+          new_window = German::GUI.new(self, owner.dictionary_database, 
+                                             owner.highscore_database)
+          new_window.draw_delete_word_button_details
+        end
+      end
+    end
+
+    def draw_delete_word_button_details
+      @shoes.para 'Enter word', align: 'center'
+
+      @shoes.flow do
+        @edit_line = @shoes.edit_line width: 0.35, displace_left: 0.20
+
+        @shoes.button 'Delete', width: 0.25, displace_left: 0.20 do
+          delete_word(@edit_line.text)
+        end
+      end
+    end
+
+    def delete_word(word)
+      if @dictionary.exists_entry? word
+        @dictionary.delete_entry(word)
+        @shoes.alert("Word '#{word}' successfully deleted")
+      else
+        @shoes.alert("Word '#{word}' was not found")
+      end
+
+      @edit_line.text = ''
     end
   end
 end

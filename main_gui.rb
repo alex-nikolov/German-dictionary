@@ -15,15 +15,15 @@ module German
       @shoes.flow(margin: 20, width: 1.0, height: 0.15, displace_top: 0.03) do
         draw_view_word_button(self)
         draw_add_word_button(self)
-        draw_edit_word_button
+        draw_edit_word_button(self)
       end
     end
 
-    def draw_view_word_button(caller)
+    def draw_view_word_button(owner)
       @shoes.button 'View word', width: 0.15, height: 1.0 do
         @shoes.window(title: 'View word', width: 400, height: 300) do
-          new_window = German::GUI.new(self, caller.dictionary_database, 
-                                             caller.highscore_database)
+          new_window = German::GUI.new(self, owner.dictionary_database, 
+                                             owner.highscore_database)
           new_window.draw_view_word_button_details
         end
       end
@@ -60,11 +60,11 @@ module German
       end
     end
 
-    def draw_add_word_button(caller)
+    def draw_add_word_button(owner)
       @shoes.button 'Add word', width: 0.15, height: 1.0 do
         @shoes.window(title: 'Add word', width: 500, height: 400) do
-          new_window = German::GUI.new(self, caller.dictionary_database, 
-                                             caller.highscore_database)
+          new_window = German::GUI.new(self, owner.dictionary_database, 
+                                             owner.highscore_database)
           new_window.draw_add_word_button_details
         end
       end
@@ -78,30 +78,32 @@ module German
           @edit_line = @shoes.edit_line(width: 140)
         end
 
-        @shoes.flow do
-          @shoes.para 'Choose part of speech '
+        draw_parts_of_speech_list_box
+      end
+    end
 
-          box = @shoes.list_box items: ['Noun', 'Verb', 'Adjective'], width: 100,
-                                choose: 'Noun'
+    def draw_parts_of_speech_list_box
+      @shoes.flow do
+        @shoes.para 'Choose part of speech '
 
-          @go = @shoes.button 'Go', align: 'right' do
-            handle_different_parts_of_speech(@edit_line.text, box.text)
-            #@shoes.close if box.text == 'Noun'
-          end
+        @box = @shoes.list_box items: ['Noun', 'Verb', 'Adjective'], width: 100,
+                               choose: 'Noun'
+
+        @shoes.button 'Go', align: 'right' do
+          handle_different_parts_of_speech(@edit_line.text, @box.text)
         end
       end
     end
 
     def handle_different_parts_of_speech(word, part_of_speech)
       if @dictionary.exists_entry? word
-        @shoes.alert "Word '#{word}' already exists"
-        return  
-      end
-
-      case part_of_speech
-        when 'Noun' then add_noun(word)
-        when 'Verb' then add_verb(word)
-        when 'Adjective' then add_adjective(word)
+        @shoes.alert "Word '#{word}' already exists" 
+      else
+        case part_of_speech
+          when 'Noun' then add_noun(word)
+          when 'Verb' then add_verb(word)
+          when 'Adjective' then add_adjective(word)
+        end
       end
     end
 
@@ -164,20 +166,73 @@ module German
     def add_new_word_and_print_success_message(new_word)
       @dictionary.add_entry(new_word)
       @shoes.alert "Word successfully added"
+
       @fields_and_add_word_button.clear
+      @edit_line.text = ''
     end
 
-    def draw_edit_word_button
+    def draw_edit_word_button(owner)
       @shoes.button 'Edit word', width: 0.15, height: 1.0 do
+        @shoes.window(title: 'Edit word', width: 400, height: 300) do
+          new_window = German::GUI.new(self, owner.dictionary_database, 
+                                             owner.highscore_database)
+          new_window.draw_edit_word_button_details
+        end
       end
     end
 
-    def experiment
-      @push = @shoes.button "Push me"
-      @note = @shoes.para "Nothing pushed so far"
-      @push.click {
-        @note.replace "Aha! Click!"
-      }
+    def draw_edit_word_button_details
+      @shoes.stack do
+        @shoes.para 'Enter word', align: 'center'
+
+        @shoes.flow do
+          @edit_line = @shoes.edit_line(width: 0.35, displace_left: 0.25)
+
+          draw_edit_word_go_button
+        end
+      end
+    end
+
+    def draw_edit_word_go_button
+      @shoes.button 'Go', width: 0.15, displace_left: 0.25 do
+        unless @dictionary.exists_entry?(@edit_line.text)
+          @shoes.alert('Entry does not exist')
+        else
+          @found_word = @dictionary.extract_entry(@edit_line.text)
+
+          draw_part_of_speech_list_box
+        end
+      end
+    end
+
+    def draw_part_of_speech_list_box
+      @part_of_speech = @shoes.flow do
+        @box = @shoes.list_box items: @found_word.fields, choose: 'Entry',
+                               width: 0.35, displace_left: 0.25
+        draw_edit_box_and_save_changes_button
+      end
+    end
+
+    def draw_edit_box_and_save_changes_button
+      @shoes.button 'Go', width: 0.15, displace_left: 0.25 do
+        @new_value.clear if @new_value
+
+        @new_value = @shoes.stack do
+          @edit = @shoes.edit_box @found_word.send("#{@box.text.downcase}"),
+                         width: 0.5, displace_left: 0.25
+
+          @shoes.button 'Save changes', width: 0.2, displace_left: 0.4 do
+            edit_entry_and_clear
+          end
+        end
+      end
+    end
+
+    def edit_entry_and_clear
+      @dictionary.edit_entry(@found_word.entry, @box.text, @edit.text)
+      @shoes.alert('Changes saved successfully')
+      @part_of_speech.clear
+      @new_value.clear
     end
   end
 end

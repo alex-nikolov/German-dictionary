@@ -31,5 +31,10 @@ module German
           "Transitive: #{@transitive}\nMeaning: #{@meaning}\n" +
             "Examples: #{examples}"
     end
+
+    def fields
+      ['Entry', 'Case', 'Preposition', 'Separable', 'Forms', 'Transitive'] +
+        ['Meaning', 'Examples']
+    end
   end
 end

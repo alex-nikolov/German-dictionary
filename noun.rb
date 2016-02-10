@@ -27,5 +27,9 @@ module German
       "Entry: #{@entry}\nGender: #{@gender}\nPlural: #{@plural}\n" + 
         "Genetive: #{genetive}\nMeaning: #{@meaning}\nExamples: #{examples}"
     end
+
+    def fields
+      ['Entry', 'Gender', 'Plural', 'Genetive', 'Meaning', 'Examples']
+    end
   end
 end

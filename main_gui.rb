@@ -38,30 +38,31 @@ module German
 
           @go = @shoes.button 'Go', align: 'right'
 
-          display_extracted_word
+          @shoes.stack do
+            @displayed_word = @shoes.para
+
+            extracted_word_on_click
+          end
         end
       end
     end
 
-    def display_extracted_word
-      @shoes.stack do
-        @displayed_word = @shoes.para
-
-        @go.click do
-          begin
-            extracted_word = @dictionary.extract_entry(@edit_line.text)
-          rescue StandardError => e
-            @displayed_word.replace e.message
-          else
-            @displayed_word.replace extracted_word
-          end
+    def extracted_word_on_click
+      @go.click do
+        begin
+          extracted_word = @dictionary.extract_entry(@edit_line.text)
+        rescue DictionaryError => e
+          @displayed_word.replace ''
+          @shoes.alert(e.message)
+        else
+          @displayed_word.replace extracted_word
         end
       end
     end
 
     def draw_add_word_button(caller)
       @shoes.button 'Add word', width: 0.15, height: 1.0 do
-        @shoes.window(title: 'Add word', width: 400, height: 300) do
+        @shoes.window(title: 'Add word', width: 500, height: 400) do
           new_window = German::GUI.new(self, caller.dictionary_database, 
                                              caller.highscore_database)
           new_window.draw_add_word_button_details
@@ -93,7 +94,7 @@ module German
 
     def handle_different_parts_of_speech(word, part_of_speech)
       if @dictionary.exists_entry? word
-        puts "Word '#{word}' already exists"
+        @shoes.alert "Word '#{word}' already exists"
         return  
       end
 
@@ -106,17 +107,31 @@ module German
 
     def add_noun(word)
       field_names = ['gender', 'plural', 'genetive', 'meaning', 'examples']
-      @shoes.stack do
+      draw_add_word_widgets(word, 'Noun', field_names)
+    end
+
+    def add_verb(word)
+      field_names = ['case', 'preposition', 'separable', 'forms'] +
+                    ['transitive', 'meaning', 'examples']
+      draw_add_word_widgets(word, 'Verb', field_names)
+    end
+
+    def add_adjective(word)
+      field_names = ['comparative', 'superlative', 'meaning', 'examples']
+      draw_add_word_widgets(word, 'Adjective', field_names)
+    end
+
+    def draw_add_word_widgets(word, part_of_speech, field_names)
+      @fields_and_add_word_button = @shoes.stack do
         edit_lines = field_names.map { |f| draw_edit_lines_for_field(f) }
 
-        draw_add_word_button_and_execute(word, edit_lines, field_names)
+        draw_button_and_execute(word, part_of_speech, edit_lines, field_names)
       end
     end
 
-    def draw_add_word_button_and_execute(word, edit_lines, field_names)
+    def draw_button_and_execute(word, part_of_speech, edit_lines, field_names)
       @shoes.button 'Add word' do
         @field_data = collect_line_data(edit_lines)
-
         @field_data.unshift(word)
 
         field_names.map! { |field| field.capitalize }.unshift('Entry')
@@ -124,7 +139,7 @@ module German
 
         word_hash = Hash[field_names.zip @field_data]
 
-        new_noun = Noun.new(word_hash)
+        new_noun = Object.const_get('German::' + part_of_speech).new(word_hash)
         add_new_word_and_print_success_message(new_noun)
       end
     end
@@ -136,15 +151,20 @@ module German
     def draw_edit_lines_for_field(field_name)
       @shoes.flow do
         @shoes.para "#{field_name.capitalize} "
-        @edit_line = @shoes.edit_line(width: 100)
+        if ['meaning', 'examples'].include? field_name
+          @edit_space = @shoes.edit_box(width: 250, height: 60)
+        else
+          @edit_space = @shoes.edit_line(width: 100)
+        end
       end
 
-      @edit_line
+      @edit_space
     end
 
     def add_new_word_and_print_success_message(new_word)
       @dictionary.add_entry(new_word)
-      @shoes.para "Word successfully added"
+      @shoes.alert "Word successfully added"
+      @fields_and_add_word_button.clear
     end
 
     def draw_edit_word_button

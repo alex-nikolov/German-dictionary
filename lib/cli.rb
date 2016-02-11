@@ -262,7 +262,3 @@ module German
     end
   end
 end
-
-German::ConsoleInterface.new('examples.db', 'highscores.db')
-#input = gets.chomp
-#puts 5 if input == '3'

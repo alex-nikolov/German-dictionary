@@ -1,4 +1,6 @@
-dictionary = German::Dictionary.new('examples.db')
+require 'spec_helper'
+
+dictionary = German::Dictionary.new('./data/examples.db')
 
 describe 'Dictionary' do
   describe '#extract_entry' do
@@ -21,19 +23,19 @@ describe 'Dictionary' do
     end
 
     it 'raises exception when entry was not found' do
-      expect { baum = dictionary.extract_entry 'Baum' }.to raise_error(German::DictionaryError, /Entry not found/)
+      expect { dictionary.extract_entry 'Baum' }.to raise_error(German::DictionaryError, /Entry not found/)
     end
   end
 
   describe '#add_entry' do
     it 'adds nouns to the database' do
       example_noun = German::Noun.new({"Entry" => "example noun",
-                               "Meaning" => "meaning",
-                               "Gender" => "gender",
-                               "Plural" => "plural",
-                               "Genetive" => "genetive",
-                               "Examples" => "examples",
-                              })
+                                       "Meaning" => "meaning",
+                                       "Gender" => "gender",
+                                       "Plural" => "plural",
+                                       "Genetive" => "genetive",
+                                       "Examples" => "examples",
+                                      })
 
       dictionary.add_entry(example_noun)
       expect(dictionary.exists_entry? 'example noun').to be true
@@ -242,34 +244,3 @@ describe 'Dictionary' do
     end
   end
 end
-
-describe 'Hash test' do
-  it 'jfsjfja' do
-    h = { 1 => 45, 24 => 92 }
-    expect(h).to include 1
-  end
-end
-
-=begin
-    expect(hund.meaning).to include 'Куче'
-    expect(hund.gender).to eq 'der'
-    expect(hund.plural).to eq 'Hunde'
-    expect(hund.genetive).to eq 'Hund(e)s'
-
-
-
-describe '#add_entry' do
-    it 'adds nouns to the database' do
-      dictionary = German::Dictionary.new
-      example_noun = Noun.new({"entry" => "example_noun",
-                               "meaning" => "meaning",
-                               "gender" => "gender",
-                               "plural" => "plural",
-                               "genetive" => "genetive",
-                               "examples" => "examples",
-                              })
-
-      expect(example_noun.entry).to eq 'Hund'
-    end
-
-=end

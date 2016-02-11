@@ -108,11 +108,7 @@ module German
                                     WHERE Entry = '#{entry}'"
       statement.execute
     end
-    #WHERE ',' || Meaning || ',' like '%,#{meaning}%'"
 
-    #WHERE Meaning LIKE
-    #OR Meaning LIKE '%#{meaning}'
-    #OR Meaning LIKE '#{meaning}%'"
     def table_columns(database, table_name)
       statement = database.prepare "SELECT * FROM #{table_name} LIMIT 1"
 

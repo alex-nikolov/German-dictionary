@@ -141,18 +141,18 @@ module German
       end
     end
 
-    def draw_button_and_execute(word, part_of_speech, edit_lines, field_names)
+    def draw_button_and_execute(word, part_of_speech, edit_lines, fields)
       @shoes.button 'Add word' do
         @field_data = collect_line_data(edit_lines)
         @field_data.unshift(word)
 
-        field_names.map! { |field| field.capitalize }.unshift('Entry')
-        field_names = field_names.join(',').gsub('Case', 'Used_case').split(',')
+        fields.map! { |field| field.capitalize }.unshift('Entry')
+        fields = field_names.join(',').gsub('Case', 'Used_case').split(',')
 
-        word_hash = Hash[field_names.zip @field_data]
+        word_hash = Hash[fields.zip @field_data]
 
-        new_noun = Object.const_get('German::' + part_of_speech).new(word_hash)
-        add_new_word_and_print_success_message(new_noun)
+        new_word = Object.const_get('German::' + part_of_speech).new(word_hash)
+        add_new_word_and_print_success_message(new_word)
       end
     end
 
@@ -432,7 +432,7 @@ module German
     def draw_view_words_with_meaning_details
       @shoes.flow do
         @edit_line = @shoes.edit_line width: 0.4, displace_left: 0.2
-        
+
         @shoes.button 'Go', width: 0.2, displace_left: 0.2 do
           display_words_with_common_meaning(@edit_line.text)
         end

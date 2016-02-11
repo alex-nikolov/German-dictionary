@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-database = './data/quiz_examples.db'
+database = './data/test databases/quiz_examples.db'
 
 describe 'Quiz' do
   describe '#initialize' do

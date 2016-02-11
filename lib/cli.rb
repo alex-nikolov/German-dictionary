@@ -34,6 +34,7 @@ module German
       puts '  add-word - adds a new word to the dictionary'
       puts "  edit <word> <field> <new_value> - edit an existing entry's field"
       puts '  delete <word> - deletes a word from the dictionary'
+      puts '  with-meaning <word> - displays all words that share meaning'
       puts '  quiz mode - enter quiz mode where you can test your knowledge'
     end
 
@@ -57,7 +58,7 @@ module German
         puts "'#{user_input}' is not a supported part of speech"
       end
 
-      handle_different_parts_of_speech(user_input)
+      handle_different_parts_of_speech(word, user_input)
     end
 
     def delete(word)
@@ -156,6 +157,17 @@ module German
       field_value = gets.chomp
     end
 
+    def with_meaning(meaning)
+      words_sharing_meaning = @dictionary.extract_entries_with_meaning(meaning)
+
+      if words_sharing_meaning.empty?
+        puts "No words with the meaning '#{meaning}' found"
+      else
+        puts "The following word(s) have the meaning '#{meaning}':"
+        puts words_sharing_meaning.each { |word| word }.join("\n\n")
+      end
+    end
+
     def menu_cases(user_input, arguments)
       case user_input
         when 'help' then help
@@ -163,6 +175,7 @@ module German
         when /add-word\s+(.+)/ then add(arguments[1])
         when /edit\s+(.+)/ then edit(arguments[1..-1])
         when /delete\s+(.+)/ then delete(arguments[1])
+        when /with-meaning\s(.+)/ then with_meaning(arguments[1])
         when 'quiz mode' then quiz_mode
         else invalid_command(user_input)
       end
@@ -220,7 +233,7 @@ module German
       puts "If you need help, type 'help'"
     end
 
-    def handle_different_parts_of_speech(user_input)
+    def handle_different_parts_of_speech(word, user_input)
       case user_input
         when 'noun' then add_noun(word)
         when 'verb' then add_verb(word)

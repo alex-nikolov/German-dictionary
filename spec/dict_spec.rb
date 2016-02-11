@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-dictionary = German::Dictionary.new('./data/examples.db')
+dictionary = German::Dictionary.new('./data/test databases/examples.db')
 
 describe 'Dictionary' do
   describe '#extract_entry' do

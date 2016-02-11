@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-database = './data/highscores_examples.db'
+database = './data/test databases/highscores_examples.db'
 
 describe 'Highscore' do
   first_highscore = German::Highscore.new(100, database, 'James', 'Meanings')

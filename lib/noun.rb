@@ -14,12 +14,9 @@ module German
 
     def add_entry(database)
       words = SQLite3::Database.open(database)
-      words.execute "INSERT INTO Nouns VALUES('#{@entry}',
-                                              '#{@gender}',
-                                              '#{@plural}',
-                                              '#{@genetive}',
-                                              '#{@meaning}',
-                                              '#{@examples}')"
+      words.execute "INSERT INTO Nouns VALUES('#{@entry}', '#{@gender}',
+                                              '#{@plural}', '#{@genetive}',
+                                              '#{@meaning}', '#{@examples}')"
       words.close if words
     end
 

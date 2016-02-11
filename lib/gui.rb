@@ -32,13 +32,15 @@ module German
     def draw_quiz_functionality_buttons
       @shoes.flow(margin: 20, width: 1.0, height: 0.15, displace_top: 0.65) do
         draw_quiz_meanings_button(self)
-        draw_highscores(self, 'high_scores_to_s', 'All high scores')
-        draw_highscores(self, 'top_five_high_scores_to_s', 'Top 5 high scores')
+        draw_quiz_nouns_button(self)
+        draw_high_scores(self, 'high_scores_to_s', 'All high scores')
+        draw_high_scores(self, 'top_five_high_scores_to_s',
+                               'Top 5 high scores')
       end
     end
 
     def draw_view_word_button(owner)
-      @shoes.button 'View word', width: 0.15, height: 1.0 do
+      @shoes.button 'View word', width: 0.2, height: 1.0 do
         @shoes.window(title: 'View word', width: 400, height: 300) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -79,7 +81,7 @@ module German
     end
 
     def draw_add_word_button(owner)
-      @shoes.button 'Add word', width: 0.15, height: 1.0 do
+      @shoes.button 'Add word', width: 0.2, height: 1.0 do
         @shoes.window(title: 'Add word', width: 500, height: 400) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -190,7 +192,7 @@ module German
     end
 
     def draw_edit_word_button(owner)
-      @shoes.button 'Edit word', width: 0.15, height: 1.0 do
+      @shoes.button 'Edit word', width: 0.2, height: 1.0 do
         @shoes.window(title: 'Edit word', width: 400, height: 300) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -254,7 +256,7 @@ module German
     end
 
     def draw_delete_word_button(owner)
-      @shoes.button 'Delete word', width: 0.15, height: 1.0 do
+      @shoes.button 'Delete word', width: 0.2, height: 1.0 do
         @shoes.window(title: 'Delete word', width: 300, height: 250) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -306,12 +308,14 @@ module German
         end
 
         @shoes.button 'End test', width: 0.3, displace_left: 0.2 do
-          end_button_execute
+          end_button_execute(quiz)
         end
       end
     end
 
     def start_button_execute(quiz)
+      @fileds_and_check.clear if @fields_and_check
+
       @fields_and_check = @shoes.stack displace_top: 0.23 do
         @current_word = @shoes.para quiz.current_word.entry, align: 'center'
 
@@ -373,7 +377,9 @@ module German
     end
 
     def draw_buttons_for_writing_new_score(quiz)
-      @shoes.stack do
+      @fields_and_check.clear
+
+      @shoes.stack displace_top: 0.4 do
         @current_word.text = "Your score is #{quiz.score}. Enter your name"
         @name = @shoes.edit_line(width: 0.3, displace_left: 0.35)
 
@@ -396,8 +402,21 @@ module German
       @edit_lines.each { |edit_line| edit_line.text = '' }
     end
 
-    def end_button_execute
+    def draw_quiz_nouns_button(owner)
+      @shoes.button 'Test nouns', width: 0.15, height: 1.0 do
+        @shoes.window(title: 'Test nouns', width: 600, height: 450) do
+          new_window = German::GUI.new(self, owner.dictionary_database,
+                                             owner.high_score_database)
+          quiz = German::Quiz.new(['Noun'], owner.dictionary_database,
+                                  ['gender', 'plural'])
+          @quiz_name = 'Nouns'
+          new_window.draw_quiz_button_details(quiz)
+        end
+      end
+    end
 
+    def end_button_execute(quiz)
+      draw_buttons_for_writing_new_score(quiz)
     end
 
     def draw_high_scores(owner, all_or_top, button_message)
@@ -429,7 +448,7 @@ module German
     end
 
     def draw_view_words_with_meaning(owner)
-      @shoes.button 'Words that share meaning', width: 0.15, height: 1.0 do
+      @shoes.button 'View by meaning', width: 0.2, height: 1.0 do
         @shoes.window(title: 'Common meaning', width: 400, height: 300) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -439,11 +458,15 @@ module German
     end
 
     def draw_view_words_with_meaning_details
-      @shoes.flow do
-        @edit_line = @shoes.edit_line width: 0.4, displace_left: 0.2
+      @shoes.stack do
+        @shoes.para 'Enter word', align: 'center'
 
-        @shoes.button 'Go', width: 0.2, displace_left: 0.2 do
-          display_words_with_common_meaning(@edit_line.text)
+        @shoes.flow do 
+          @edit_line = @shoes.edit_line width: 0.4, displace_left: 0.2
+
+          @shoes.button 'Go', width: 0.2, displace_left: 0.2 do
+            display_words_with_common_meaning(@edit_line.text)
+          end
         end
       end
     end

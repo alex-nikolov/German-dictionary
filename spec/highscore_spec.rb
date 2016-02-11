@@ -10,7 +10,7 @@ describe 'HighScore' do
     it 'formats the time correctly' do
       high_score = German::HighScore.new(100, database, 'James', 'Meanings')
       time = Time.now
-      expect(time.strftime('%F %H:%M:%S')).to eq highscore.time
+      expect(time.strftime('%F %H:%M:%S')).to eq high_score.time
     end
   end
 
@@ -22,13 +22,13 @@ describe 'HighScore' do
   end
 
   describe '#write_to_table' do
-    it 'writes high_scores to empty table' do
+    it 'writes high scores to empty table' do
       first_high_score.write_to_table
       expected_result = "100.0\tJames\t#{first_high_score.time}"
       expect(German::HighScore.high_scores_to_s(database, 'Meanings')).to eq expected_result
     end
 
-    it 'writes high_scores to non-empty table' do
+    it 'writes high scores to non-empty table' do
       second_high_score.write_to_table
       expected_result = "100.0\tJames\t#{first_high_score.time}\n" +
                         "80.0\tRodrigo\t#{second_high_score.time}"

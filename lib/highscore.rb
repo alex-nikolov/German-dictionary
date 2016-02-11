@@ -18,11 +18,11 @@ module German
       high_scores = SQLite3::Database.open @database
       high_scores.results_as_hash = true
 
-      high_scores.execute "INSERT INTO #{@quiz_name} VALUES(#{@high_score},
-                                                           '#{@name}',
-                                                           '#{@time}')"
+      high_scores.execute "INSERT INTO #{@quiz_name} VALUES (#{@high_score},
+                                                            '#{@name}',
+                                                            '#{@time}')"
 
-      high_scores.close if highscores
+      high_scores.close if high_scores
     end
 
     def self.high_scores_to_s(database, quiz_name)

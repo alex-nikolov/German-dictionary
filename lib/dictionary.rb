@@ -72,7 +72,7 @@ module German
       end
 
       statement = update_field_statement(found, entry, field, new_value)
-      close_database(words, statement)
+      close_database(@words, statement)
     end
 
     private
@@ -97,7 +97,8 @@ module German
         statement = words.prepare "SELECT * FROM #{database}
                                    WHERE Meaning LIKE '% #{meaning} %'
                                       OR Meaning LIKE '% #{meaning},%'
-                                      OR Meaning LIKE '%#{meaning}'"
+                                      OR Meaning LIKE '%#{meaning}'
+                                      OR Meaning LIKE '%#{meaning},%'"
         statement.execute
       end
     end

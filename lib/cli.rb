@@ -6,9 +6,9 @@ require_relative 'highscore'
 
 module German
   class ConsoleInterface
-    def initialize(dictionary_database, highscore_database)
+    def initialize(dictionary_database, high_score_database)
       @dictionary = Dictionary.new(dictionary_database)
-      @highscore_database = highscore_database
+      @high_score_database = high_score_database
 
       main_menu
     end
@@ -49,7 +49,7 @@ module German
     def add(word)
       if @dictionary.exists_entry? word
         puts "Word '#{word}' already exists"
-        return  
+        return
       end
 
       puts "Enter the word's part of speech (noun, verb or adj)"
@@ -118,7 +118,7 @@ module German
         suggestions = tested_fields.map do |field|
           user_input_in_quiz(quiz, field)
         end
-        
+
         break if suggestions.include? 'q'
 
         guess_correctness = quiz.guess(suggestions)
@@ -126,7 +126,7 @@ module German
       end
 
       display_score(quiz)
-      configure_highscore(quiz.score, quiz_name)
+      configure_high_score(quiz.score, quiz_name)
     end
 
     def add_new_word_and_print_success_message(new_word)
@@ -202,8 +202,8 @@ module German
         when 'help' then quiz_help
         when 'quiz meanings' then quiz_meaning
         when 'quiz nouns' then quiz_nouns
-        when /highscore(.+)top/ then top_highscores(arguments[1])
-        when /highscore(.+)all/ then all_highscores(arguments[1])
+        when /highscore(.+)top/ then top_high_scores(arguments[1])
+        when /highscore(.+)all/ then all_high_scores(arguments[1])
         when 'q' then main_menu(false)
         else invalid_command(user_input)
       end
@@ -219,13 +219,15 @@ module German
       puts '  highscore <name> all - view all scores' + from_quiz
     end
 
-    def top_highscores(quiz_name)
+    def top_high_scores(quiz_name)
       capitalized = quiz_name.capitalize
-      puts Highscore.top_five_highscores_to_s(@highscore_database, capitalized)
+      puts HighScore.top_five_high_scores_to_s(@high_score_database,
+                                               capitalized)
     end
 
-    def all_highscores(quiz_name)
-      puts Highscore.highscores_to_s(@highscore_database, quiz_name.capitalize)
+    def all_high_scores(quiz_name)
+      puts HighScore.high_scores_to_s(@high_score_database,
+                                      quiz_name.capitalize)
     end
 
     def invalid_command(command)
@@ -264,11 +266,11 @@ module German
       end
     end
 
-    def configure_highscore(score, quiz_name)
+    def configure_high_score(score, quiz_name)
       puts 'Enter name for new score'
       name = gets.chomp
 
-      new_score = Highscore.new(score, @highscore_database, name, quiz_name)
+      new_score = HighScore.new(score, @high_score_database, name, quiz_name)
       new_score.write_to_table
 
       puts 'Score successfully added'

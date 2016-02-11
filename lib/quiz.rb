@@ -85,13 +85,13 @@ module German
       @total_answers += 1
     end
 
-    def evaluate_correctness_of_suggestion(suggestion_with_field, correct_answer)
-      if suggestion_with_field.first == correct_answer
+    def evaluate_correctness_of_suggestion(suggestion_with_field, answer)
+      if suggestion_with_field.first == answer
         [1, 'Correct']
-      elsif /\b#{suggestion_with_field.first}\b/ =~ correct_answer
-        [0.5, correct_answer]
+      elsif /\b#{suggestion_with_field.first}\b/ =~ answer
+        [0.5, answer]
       else
-        [0, correct_answer]
+        [0, answer]
       end
     end
 

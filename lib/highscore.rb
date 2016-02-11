@@ -1,11 +1,11 @@
 require 'sqlite3'
 
 module German
-  class Highscore
+  class HighScore
     attr_reader :time
 
     def initialize(score, database, name, quiz_name)
-      @highscore = score
+      @high_score = score
       @database = database
       @name = name
       @quiz_name = quiz_name
@@ -15,28 +15,28 @@ module German
     end
 
     def write_to_table
-      highscores = SQLite3::Database.open @database
-      highscores.results_as_hash = true
+      high_scores = SQLite3::Database.open @database
+      high_scores.results_as_hash = true
 
-      highscores.execute "INSERT INTO #{@quiz_name} VALUES(#{@highscore},
-                                                          '#{@name}',
-                                                          '#{@time}')"
+      high_scores.execute "INSERT INTO #{@quiz_name} VALUES(#{@high_score},
+                                                           '#{@name}',
+                                                           '#{@time}')"
 
-      highscores.close if highscores
+      high_scores.close if highscores
     end
 
-    def self.highscores_to_s(database, quiz_name)
-      self.highscores(database, quiz_name, '')
+    def self.high_scores_to_s(database, quiz_name)
+      self.high_scores(database, quiz_name, '')
     end
 
-    def self.top_five_highscores_to_s(database, quiz_name)
+    def self.top_five_high_scores_to_s(database, quiz_name)
       additional_attribute = " ORDER BY Highscore DESC LIMIT 5"
-      self.highscores(database, quiz_name, additional_attribute)
+      self.high_scores(database, quiz_name, additional_attribute)
     end
 
     def self.reset(database, quiz_name)
-      highscores = SQLite3::Database.open database
-      highscores.execute "DELETE FROM #{quiz_name}"
+      high_scores = SQLite3::Database.open database
+      high_scores.execute "DELETE FROM #{quiz_name}"
     end
 
     private
@@ -45,26 +45,24 @@ module German
       @time = @time.strftime('%F %H:%M:%S')
     end
 
-    def self.highscores(database, quiz_name, additional_attribute = '')
-      highscores = SQLite3::Database.open database
-      highscores.results_as_hash = true
-      run_statement = highscores.execute "SELECT * FROM #{quiz_name}" +
+    def self.high_scores(database, quiz_name, additional_attribute = '')
+      high_scores = SQLite3::Database.open database
+      high_scores.results_as_hash = true
+      run_statement = high_scores.execute "SELECT * FROM #{quiz_name}" +
                                          additional_attribute
 
-      self.generate_string_with_highscores(run_statement)
+      self.generate_string_with_high_scores(run_statement)
     end
 
-    def self.generate_string_with_highscores(run_statement)
-      highscores_array = []
+    def self.generate_string_with_high_scores(run_statement)
+      high_scores_array = []
 
       run_statement.each do |row|
-        highscores_array << "#{row['Highscore']}\t#{row['Name']}\t" +
+        high_scores_array << "#{row['Highscore']}\t#{row['Name']}\t" +
                               "#{row['Time']}"
       end
 
-      highscores_array.join("\n")
+      high_scores_array.join("\n")
     end
   end
 end
-
-# rspec highscore_spec.rb --require ./highscore.rb --colour --format documentation

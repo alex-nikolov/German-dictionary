@@ -62,16 +62,16 @@ module German
     end
 
     def edit_entry(entry, field, new_value)
-      words = SQLite3::Database.open @database
+      @words = SQLite3::Database.open @database
 
-      found = locate_database_for_entry(words, entry)
+      found = locate_database_for_entry(@words, entry)
 
       check_if_one_database_found(found)
-      unless table_columns(words, found[0]).include? field
+      unless table_columns(@words, found[0]).include? field
         raise DictionaryError, 'Invalid field'
       end
 
-      statement = update_field_statement(found, entry, field, new_value, words)
+      statement = update_field_statement(found, entry, field, new_value)
       close_database(words, statement)
     end
 
@@ -102,10 +102,10 @@ module German
       end
     end
 
-    def update_field_statement(found, entry, field, new_value, database)
-      statement = database.prepare "UPDATE #{found[0]}
-                                    SET #{field} = '#{new_value}'
-                                    WHERE Entry = '#{entry}'"
+    def update_field_statement(found, entry, field, new_value)
+      statement = @words.prepare "UPDATE #{found[0]}
+                                  SET #{field} = '#{new_value}'
+                                  WHERE Entry = '#{entry}'"
       statement.execute
     end
 

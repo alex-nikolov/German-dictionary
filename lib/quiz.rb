@@ -119,5 +119,3 @@ module German
     end
   end
 end
-
-# rspec quiz_spec.rb --require ./quiz.rb --colour --format documentation

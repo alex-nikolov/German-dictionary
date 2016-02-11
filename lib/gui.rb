@@ -20,7 +20,7 @@ module German
     end
 
     def draw_core_functionality_buttons
-      @shoes.flow(margin: 20, width: 1.0, height: 0.15, displace_top: 0.03) do
+      @shoes.flow(margin: 20, width: 1.0, height: 0.35, displace_top: 0.03) do
         draw_view_word_button(self)
         draw_add_word_button(self)
         draw_edit_word_button(self)
@@ -30,7 +30,7 @@ module German
     end
 
     def draw_quiz_functionality_buttons
-      @shoes.flow(margin: 20, width: 1.0, height: 0.15, displace_top: 0.65) do
+      @shoes.flow(margin: 20, width: 1.0, height: 0.35, displace_top: 0.25) do
         draw_quiz_meanings_button(self)
         draw_quiz_nouns_button(self)
         draw_high_scores(self, 'high_scores_to_s', 'All high scores')
@@ -157,7 +157,7 @@ module German
         @field_data.unshift(word)
 
         fields.map! { |field| field.capitalize }.unshift('Entry')
-        fields = field_names.join(',').gsub('Case', 'Used_case').split(',')
+        fields = fields.join(',').gsub('Case', 'Used_case').split(',')
 
         word_hash = Hash[fields.zip @field_data]
 
@@ -289,7 +289,7 @@ module German
     end
 
     def draw_quiz_meanings_button(owner)
-      @shoes.button 'Test meanings', width: 0.15, height: 1.0 do
+      @shoes.button 'Test meanings', width: 0.25, height: 1.0 do
         @shoes.window(title: 'Test meanings', width: 600, height: 450) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -314,7 +314,8 @@ module German
     end
 
     def start_button_execute(quiz)
-      @fileds_and_check.clear if @fields_and_check
+      @fields_and_check.clear if @fields_and_check
+      @fields_for_saving_score.clear if @fields_for_saving_score
 
       @fields_and_check = @shoes.stack displace_top: 0.23 do
         @current_word = @shoes.para quiz.current_word.entry, align: 'center'
@@ -379,7 +380,7 @@ module German
     def draw_buttons_for_writing_new_score(quiz)
       @fields_and_check.clear
 
-      @shoes.stack displace_top: 0.4 do
+      @fields_for_saving_score = @shoes.stack displace_top: 0.4 do
         @current_word.text = "Your score is #{quiz.score}. Enter your name"
         @name = @shoes.edit_line(width: 0.3, displace_left: 0.35)
 
@@ -403,7 +404,7 @@ module German
     end
 
     def draw_quiz_nouns_button(owner)
-      @shoes.button 'Test nouns', width: 0.15, height: 1.0 do
+      @shoes.button 'Test nouns', width: 0.25, height: 1.0 do
         @shoes.window(title: 'Test nouns', width: 600, height: 450) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)
@@ -416,11 +417,13 @@ module German
     end
 
     def end_button_execute(quiz)
+      @fields_for_saving_score.clear if @fields_for_saving_score
+
       draw_buttons_for_writing_new_score(quiz)
     end
 
     def draw_high_scores(owner, all_or_top, button_message)
-      @shoes.button "#{button_message}", width: 0.15, height: 1.0 do
+      @shoes.button "#{button_message}", width: 0.25, height: 1.0 do
         @shoes.window(title: "#{button_message}", width: 400, height: 300) do
           new_window = German::GUI.new(self, owner.dictionary_database,
                                              owner.high_score_database)

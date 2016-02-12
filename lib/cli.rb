@@ -9,8 +9,6 @@ module German
     def initialize(dictionary_database, high_score_database)
       @dictionary = Dictionary.new(dictionary_database)
       @high_score_database = high_score_database
-
-      main_menu
     end
 
     def main_menu(new_start = true)
@@ -19,7 +17,7 @@ module German
       end
 
       loop do
-        user_input = gets.chomp
+        user_input = STDIN.gets.chomp
         exit if user_input == 'q'
 
         arguments = user_input.split(' ')
@@ -29,13 +27,13 @@ module German
     end
 
     def help
-      puts 'The following commands are available:'
-      puts '  extract <word> - displays a word from the dictionary'
-      puts '  add-word - adds a new word to the dictionary'
-      puts "  edit <word> <field> <new_value> - edit an existing entry's field"
-      puts '  delete <word> - deletes a word from the dictionary'
-      puts '  with-meaning <word> - displays all words that share meaning'
-      puts '  quiz mode - enter quiz mode where you can test your knowledge'
+      puts "The following commands are available:\n" +
+           "  extract <word> - displays a word from the dictionary\n" +
+           "  add-word - adds a new word to the dictionary\n" +
+           "  edit <word> <field> <new_value> - edit an existing entry's field\n" +
+           "  delete <word> - deletes a word from the dictionary\n" +
+           "  with-meaning <word> - displays all words that share meaning\n" +
+           "  quiz mode - enter quiz mode where you can test your knowledge"
     end
 
     def extract(word)
@@ -54,7 +52,7 @@ module German
 
       puts "Enter the word's part of speech (noun, verb or adj)"
 
-      until (user_input = gets.chomp) =~ /(noun|verb|adj)/
+      until (user_input = STDIN.gets.chomp) =~ /(noun|verb|adj)/
         puts "'#{user_input}' is not a supported part of speech"
       end
 
@@ -154,7 +152,7 @@ module German
 
     def enter_field(field_name)
       puts "Enter the word's #{field_name}: "
-      field_value = gets.chomp
+      field_value = STDIN.gets.chomp
     end
 
     def with_meaning(meaning)
@@ -185,7 +183,7 @@ module German
       quiz_help
 
       loop do
-        user_input = gets.chomp
+        user_input = STDIN.gets.chomp
         if user_input == 'q'
           puts 'Switching back to main menu'
           main_menu(false)
@@ -245,7 +243,7 @@ module German
 
     def user_input_in_quiz(quiz, field)
       puts "Enter supposed #{field} of #{quiz.current_word.entry}"
-      user_input = gets.chomp
+      user_input = STDIN.gets.chomp
     end
 
     def display_score(quiz)
@@ -268,7 +266,7 @@ module German
 
     def configure_high_score(score, quiz_name)
       puts 'Enter name for new score'
-      name = gets.chomp
+      name = STDIN.gets.chomp
 
       new_score = HighScore.new(score, @high_score_database, name, quiz_name)
       new_score.write_to_table

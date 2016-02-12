@@ -2,6 +2,8 @@ require_relative 'dictionary'
 require_relative 'quiz'
 require_relative 'highscore'
 
+require 'shoes'
+
 module German
   class GUI
     attr_reader :dictionary, :dictionary_database, :high_score_database
